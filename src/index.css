@@ -298,3 +298,21 @@ i[class*="van-type-"] {
   text-decoration: underline;
   font-weight: 600;
 }
+
+footer {
+  background-color: #161616;
+  color: #aaaaaa;
+  height: 74px;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+  font-weight: 500;
+}
+
+.active-link {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #161616;
+}
