@@ -448,3 +448,30 @@ i[class*="van-type-"] {
   height: 100px;
   border-radius: 5px;
 }
+
+.van-list-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.van-list-filter-buttons > button {
+  cursor: pointer;
+  padding: 6px 26px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ffead0;
+  color: #4d4d4d;
+  font-weight: 500;
+  transition: background-color 200ms;
+}
+
+.van-list-filter-buttons > button.selected {
+  color: white;
+}
+
+.van-list-filter-buttons > button.clear-filters {
+  background-color: #4d4d4d;
+  color: white;
+}
