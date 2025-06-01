@@ -24,7 +24,7 @@ export default function Vans() {
     <div key={van.id} className="van-tile">
       <Link
         to={`/vans/${van.id}`}
-        state={{ search: `?type=${typeFilter}` }}
+        state={{ search: `?type=${typeFilter}`, type: typeFilter }}
         aria-label={`View details for ${van.name}, 
            priced at $${van.price} per day`}
       >
