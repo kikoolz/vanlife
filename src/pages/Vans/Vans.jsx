@@ -6,7 +6,8 @@ export default function Vans() {
   const [vans, setVans] = React.useState([]);
 
   const typeFilter = searchParams.get("type");
-  console.log(typeFilter);
+  // Fetch vans data from the API
+  // This effect runs once when the component mounts
 
   React.useEffect(() => {
     fetch("/api/vans")
@@ -23,6 +24,7 @@ export default function Vans() {
     <div key={van.id} className="van-tile">
       <Link
         to={`/vans/${van.id}`}
+        state={{ search: `?type=${typeFilter}` }}
         aria-label={`View details for ${van.name}, 
            priced at $${van.price} per day`}
       >
