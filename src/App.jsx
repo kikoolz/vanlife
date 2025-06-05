@@ -21,6 +21,7 @@ import "./index.css";
 import Layout from "./components/Layout";
 import HostLayout from "./components/HostLayout";
 import NotFound from "./pages/NotFound";
+import { loader as vansLoader } from "./pages/Vans/Vans";
 import "./server";
 
 const router = createBrowserRouter(
@@ -30,7 +31,7 @@ const router = createBrowserRouter(
       <Route path="about" element={<About />} />
 
       <Route path="vans">
-        <Route index element={<Vans />} />
+        <Route index element={<Vans />} loader={vansLoader} />
         <Route path=":id" element={<VanDetail />} />
       </Route>
 
