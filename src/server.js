@@ -80,8 +80,15 @@ createServer({
     // this.timing = 2000
 
     this.get("/vans", (schema, request) => {
-      return new Response(400, {}, { error: "Error fetching data" });
-      // return schema.vans.all()
+      try {
+        const vans = schema.vans.all();
+        if (!vans) {
+          return new Response(400, {}, { error: "Error fetching data" });
+        }
+        return vans;
+      } catch (error) {
+        return new Response(400, {}, { error: "Error fetching data" });
+      }
     });
 
     this.get("/vans/:id", (schema, request) => {
