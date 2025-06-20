@@ -21,6 +21,7 @@ import "./index.css";
 import Layout from "./components/Layout";
 import HostLayout from "./components/HostLayout";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 import Error from "./components/Error";
 import { loader as vansLoader } from "./pages/Vans/Vans";
 import "./server";
