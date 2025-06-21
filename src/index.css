@@ -61,6 +61,9 @@ header .login-link {
   display: inline-flex;
   align-items: center;
 }
+nav {
+  display: flex;
+}
 
 main {
   margin-bottom: 84px;
