@@ -29,10 +29,22 @@ function setCachedResponse(cacheKey, data) {
 
 function handleSupabaseError(error, fallbackMessage) {
   if (error) {
+    // Map common Supabase error codes to user-friendly messages
+    const errorMessages = {
+      "23505": "This record already exists.",
+      "23503": "Referenced record does not exist.",
+      "23502": "Required field is missing.",
+      "PGRST116": "No data found.",
+      "PGRST204": "Column not found in database.",
+      "JWT0000": "Authentication failed. Please log in again.",
+    };
+
+    const userMessage = errorMessages[error.code] || fallbackMessage || "Something went wrong. Please try again.";
+
     throw createApiError(
       error.code || 500,
       error.message || "Database Error",
-      error.message || fallbackMessage,
+      userMessage,
     );
   }
 }
@@ -497,5 +509,37 @@ export async function createVan(vanData) {
   // Invalidate cache to refresh van list
   responseCache.delete("vans:all");
 
+  return data;
+}
+
+export async function deleteVan(vanId) {
+  const { error } = await supabase
+    .from("vans")
+    .delete()
+    .eq("id", vanId);
+
+  handleSupabaseError(error, "Failed to delete van.");
+
+  // Invalidate cache to refresh van list
+  responseCache.delete(`van:${vanId}`);
+  responseCache.delete("vans:all");
+}
+
+export async function updateBookingDates(bookingId, startDate, endDate) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .update({
+      start_date: startDate,
+      end_date: endDate,
+    })
+    .eq("id", bookingId)
+    .select()
+    .single();
+
+  handleSupabaseError(error, "Failed to update booking dates.");
+
+  // Invalidate cache
+  responseCache.delete(`booking:${bookingId}`);
+  
   return data;
 }

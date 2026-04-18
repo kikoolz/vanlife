@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getUserBookings, cancelBooking } from "../api";
+import { getUserBookings, cancelBooking, updateBookingDates } from "../api";
 import { supabase } from "../lib/supabase";
 
 export default function UserBookings() {
@@ -10,6 +10,9 @@ export default function UserBookings() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [showEditDates, setShowEditDates] = useState(false);
+  const [editDates, setEditDates] = useState({ startDate: "", endDate: "" });
+  const [updatingDates, setUpdatingDates] = useState(false);
 
   useEffect(() => {
     loadBookings();
@@ -47,6 +50,32 @@ export default function UserBookings() {
       setError(err.message || "Failed to cancel booking.");
     } finally {
       setCancelling(false);
+    }
+  }
+
+  function openEditDates(booking) {
+    setSelectedBooking(booking);
+    setEditDates({
+      startDate: booking.start_date,
+      endDate: booking.end_date,
+    });
+    setShowEditDates(true);
+  }
+
+  async function handleUpdateDates() {
+    if (!selectedBooking || !editDates.startDate || !editDates.endDate) return;
+
+    try {
+      setUpdatingDates(true);
+      await updateBookingDates(selectedBooking.id, editDates.startDate, editDates.endDate);
+      await loadBookings();
+      setShowEditDates(false);
+      setSelectedBooking(null);
+      setEditDates({ startDate: "", endDate: "" });
+    } catch (err) {
+      setError(err.message || "Failed to update booking dates.");
+    } finally {
+      setUpdatingDates(false);
     }
   }
 
@@ -182,6 +211,14 @@ export default function UserBookings() {
                 >
                   View Details
                 </Link>
+                {booking.status === "pending" && (
+                  <button
+                    onClick={() => openEditDates(booking)}
+                    className="link-button secondary"
+                  >
+                    Edit Dates
+                  </button>
+                )}
                 {(booking.status === "pending" || booking.status === "confirmed") && (
                   <button
                     onClick={() => {
@@ -227,6 +264,60 @@ export default function UserBookings() {
                 disabled={cancelling}
               >
                 {cancelling ? "Cancelling..." : "Yes, Cancel Booking"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditDates && selectedBooking && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Edit Booking Dates</h2>
+            <p>
+              Update your booking dates for{" "}
+              <strong>{selectedBooking.vans?.name}</strong>
+            </p>
+            <div className="edit-dates-form">
+              <div className="form-group">
+                <label htmlFor="startDate">Start Date</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={editDates.startDate}
+                  onChange={(e) => setEditDates({ ...editDates, startDate: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="endDate">End Date</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={editDates.endDate}
+                  onChange={(e) => setEditDates({ ...editDates, endDate: e.target.value })}
+                  min={editDates.startDate || new Date().toISOString().split('T')[0]}
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                onClick={() => {
+                  setShowEditDates(false);
+                  setSelectedBooking(null);
+                  setEditDates({ startDate: "", endDate: "" });
+                }}
+                className="link-button secondary"
+                disabled={updatingDates}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateDates}
+                className="link-button"
+                disabled={updatingDates}
+              >
+                {updatingDates ? "Updating..." : "Update Dates"}
               </button>
             </div>
           </div>

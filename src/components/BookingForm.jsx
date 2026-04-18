@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBooking, checkAvailability, createPaymentIntent } from "../api";
+import { createBooking, checkAvailability, createPaymentIntent as createPaymentIntentAPI } from "../api";
 import { supabase } from "../lib/supabase";
 import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
@@ -91,16 +91,12 @@ function BookingFormContent({ van }) {
 
     try {
       const totalPrice = calculateTotalPrice();
-      console.log("Creating payment intent for:", totalPrice);
       const paymentIntent = await createPaymentIntent(totalPrice);
-      console.log("Payment intent created:", paymentIntent);
       setClientSecret(paymentIntent.clientSecret);
       setPaymentIntentId(paymentIntent.id);
       setShowPaymentForm(true);
-      console.log("Payment form should now be visible");
     } catch (err) {
-      console.error("Payment intent creation error:", err);
-      setError(err.message || "Failed to initialize payment.");
+      setError(err.message || "Failed to initialize payment. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -164,8 +160,6 @@ function BookingFormContent({ van }) {
   const days = startDate && endDate 
     ? Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))
     : 0;
-
-  console.log("BookingForm state:", { showPaymentForm, availability, paymentIntentId, clientSecret: clientSecret ? "set" : "not set" });
 
   return (
     <div className="booking-form-container">

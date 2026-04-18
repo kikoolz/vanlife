@@ -129,6 +129,12 @@ const router = createBrowserRouter(
             lazy={lazyRoute(() => import("./pages/Host/HostVanPhotos"))}
             errorElement={<Error />}
           />
+          <Route
+            path="edit"
+            loader={requireAuth}
+            lazy={lazyRoute(() => import("./pages/Host/HostEditVan"))}
+            errorElement={<Error />}
+          />
         </Route>
       </Route>
       <Route

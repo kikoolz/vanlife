@@ -12,26 +12,20 @@ export default function HostVanPhotos() {
   }
 
   const handleImageUpload = async (publicUrl, path) => {
-    console.log("Image uploaded:", publicUrl, path);
     try {
       await updateVan(currentVan.id, { imageUrl: publicUrl });
       setLocalImageUrl(publicUrl);
-      console.log("Database updated successfully");
     } catch (err) {
-      console.error("Failed to update database:", err);
-      alert("Failed to save image to database");
+      alert(err.message || "Failed to save image. Please try again.");
     }
   };
 
   const handleImageDelete = async () => {
-    console.log("Image deleted");
     try {
       await updateVan(currentVan.id, { imageUrl: "" });
       setLocalImageUrl("");
-      console.log("Database updated successfully");
     } catch (err) {
-      console.error("Failed to update database:", err);
-      alert("Failed to remove image from database");
+      alert(err.message || "Failed to remove image. Please try again.");
     }
   };
 

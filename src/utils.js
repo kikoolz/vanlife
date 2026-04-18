@@ -106,3 +106,34 @@ export async function getDemoHostId() {
 
   return DEMO_HOST_BY_EMAIL[normalizedEmail] || DEFAULT_DEMO_HOST_ID;
 }
+
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export function sanitizeString(input) {
+  if (typeof input !== 'string') return '';
+  return input
+    .trim()
+    .replace(/[<>]/g, '') // Remove < and > to prevent XSS
+    .substring(0, 1000); // Limit length
+}
+
+export function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+export function validatePrice(price) {
+  const num = parseFloat(price);
+  return !isNaN(num) && num >= 0;
+}
+
+export function validateDate(dateString) {
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}

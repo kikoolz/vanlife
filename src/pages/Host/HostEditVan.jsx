@@ -1,20 +1,29 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createVan } from "../../api";
-import { getDemoHostId, generateUUID, sanitizeString, validatePrice } from "../../utils";
+import { useNavigate, useLoaderData, useOutletContext } from "react-router-dom";
+import { updateVan, deleteVan } from "../../api";
+import { sanitizeString, validatePrice } from "../../utils";
 import ImageUploader from "../../components/ImageUploader";
 
-export default function HostAddVan() {
+export async function loader({ params, request }) {
+  // This loader will receive the van data from the parent route
+  return null;
+}
+
+export default function HostEditVan() {
   const navigate = useNavigate();
+  const { currentVan } = useOutletContext();
+  
   const [formData, setFormData] = useState({
-    name: "",
-    type: "simple",
-    price: "",
-    description: "",
+    name: currentVan?.name || "",
+    type: currentVan?.type || "simple",
+    price: currentVan?.price || "",
+    description: currentVan?.description || "",
   });
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState(currentVan?.imageUrl || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,6 +36,19 @@ export default function HostAddVan() {
 
   const handleImageDelete = () => {
     setImageUrl("");
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteVan(currentVan.id);
+      navigate("/host/vans");
+    } catch (err) {
+      setError(err.message || "Failed to delete van. Please try again.");
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -54,31 +76,30 @@ export default function HostAddVan() {
         return;
       }
 
-      const hostId = await getDemoHostId();
-      // Generate a unique ID using UUID
-      const uniqueId = generateUUID();
       const vanData = {
-        id: uniqueId,
         name: sanitizeString(formData.name),
         type: formData.type,
         price: parseFloat(formData.price),
         description: sanitizeString(formData.description),
         imageUrl: imageUrl,
-        host_id: String(hostId),
       };
 
-      const newVan = await createVan(vanData);
-      navigate(`/host/vans/${newVan.id}`);
+      await updateVan(currentVan.id, vanData);
+      navigate(`/host/vans/${currentVan.id}`);
     } catch (err) {
-      setError(err.message || "Failed to create van. Please check your input and try again.");
+      setError(err.message || "Failed to update van. Please check your input and try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!currentVan) {
+    return <div>Loading van data...</div>;
+  }
+
   return (
     <div className="host-add-van">
-      <h1>Add New Van</h1>
+      <h1>Edit Van</h1>
       {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handleSubmit} className="van-form">
@@ -150,19 +171,50 @@ export default function HostAddVan() {
         <div className="form-actions">
           <button
             type="button"
-            onClick={() => navigate("/host/vans")}
+            onClick={() => navigate(`/host/vans/${currentVan.id}`)}
             className="cancel-button"
           >
             Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="delete-button"
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Delete Van"}
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
             className="submit-button"
           >
-            {isSubmitting ? "Creating..." : "Create Van"}
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </button>
         </div>
+
+        {showDeleteConfirm && (
+          <div className="delete-confirmation">
+            <p>Are you sure you want to delete this van? This action cannot be undone.</p>
+            <div className="delete-confirmation-actions">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="cancel-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="delete-confirm-button"
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

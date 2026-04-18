@@ -1,6 +1,8 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { getHostVans } from "../../api";
 import { requireAuth } from "../../utils";
+import { Suspense } from "react";
+import { SkeletonVanCard } from "../../components/Skeleton";
 
 export async function loader({ request }) {
   await requireAuth({ request });
@@ -30,9 +32,11 @@ export default function HostVans() {
           Add Van
         </Link>
       </div>
-      <div className="host-vans-list">
-        <section>{hostVansEls}</section>
-      </div>
+      <Suspense fallback={<div className="host-vans-list"><section>{Array.from({ length: 6 }).map((_, i) => <SkeletonVanCard key={i} />)}</section></div>}>
+        <div className="host-vans-list">
+          <section>{hostVansEls}</section>
+        </div>
+      </Suspense>
     </section>
   );
 }
