@@ -93,6 +93,10 @@ export default function Login() {
           Sign up
         </Link>
       </p>
+
+      <p className="auth-switch-copy">
+        <Link to="/password-reset">Forgot password?</Link>
+      </p>
     </div>
   );
 }

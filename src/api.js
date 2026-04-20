@@ -543,3 +543,56 @@ export async function updateBookingDates(bookingId, startDate, endDate) {
   
   return data;
 }
+
+// ============================================
+// REVIEW API FUNCTIONS
+// ============================================
+
+export async function createReview(reviewData) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .insert([
+      {
+        van_id: reviewData.vanId,
+        user_id: reviewData.userId,
+        booking_id: reviewData.bookingId,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+      },
+    ])
+    .select()
+    .single();
+
+  handleSupabaseError(error, "Failed to create review.");
+
+  return data;
+}
+
+export async function getVanReviews(vanId) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(`
+      *,
+      user:user_id (
+        email
+      )
+    `)
+    .eq("van_id", vanId)
+    .order("created_at", { ascending: false });
+
+  handleSupabaseError(error, "Failed to fetch van reviews.");
+
+  return data;
+}
+
+export async function getUserReviewForBooking(bookingId) {
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("booking_id", bookingId)
+    .maybeSingle();
+
+  handleSupabaseError(error, "Failed to fetch review.");
+
+  return data;
+}

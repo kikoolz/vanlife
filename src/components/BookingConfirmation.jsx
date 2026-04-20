@@ -1,6 +1,7 @@
 import { useLocation, useNavigate, Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getBookingById } from "../api";
+import ReviewForm from "./ReviewForm";
 
 export default function BookingConfirmation() {
   const location = useLocation();
@@ -163,6 +164,12 @@ export default function BookingConfirmation() {
             View My Bookings
           </Link>
         </div>
+
+        {booking.status === "completed" && booking.vans && (
+          <div className="review-section">
+            <ReviewForm booking={booking} van={booking.vans} />
+          </div>
+        )}
       </div>
     </div>
   );

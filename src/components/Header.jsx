@@ -64,13 +64,21 @@ export default function Header() {
           Vans
         </NavLink>
         {isAuthenticated ? (
-          <button
-            type="button"
-            className="header-auth-button"
-            onClick={handleLogout}
-          >
-            Log out
-          </button>
+          <>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) => (isActive ? "active-link" : null)}
+            >
+              Profile
+            </NavLink>
+            <button
+              type="button"
+              className="header-auth-button"
+              onClick={handleLogout}
+            >
+              Log out
+            </button>
+          </>
         ) : (
           <Link to="/login" className="login-link" aria-label="Log in">
             <img

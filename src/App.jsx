@@ -10,6 +10,10 @@ import HostLayout from "./components/HostLayout";
 import Error from "./components/Error";
 import BookingConfirmation from "./components/BookingConfirmation";
 import UserBookings from "./pages/UserBookings";
+import UserProfile from "./pages/UserProfile";
+import PasswordReset from "./pages/PasswordReset";
+import PasswordResetConfirm from "./pages/PasswordResetConfirm";
+import HostProfile from "./pages/Host/HostProfile";
 import HostBookings from "./pages/Host/HostBookings";
 import { requireAuth } from "./utils";
 
@@ -51,6 +55,16 @@ const router = createBrowserRouter(
         lazy={lazyRoute(() => import("./pages/Signup"))}
         errorElement={<Error />}
       />
+      <Route
+        path="password-reset"
+        element={<PasswordReset />}
+        errorElement={<Error />}
+      />
+      <Route
+        path="password-reset/confirm"
+        element={<PasswordResetConfirm />}
+        errorElement={<Error />}
+      />
       <Route path="vans">
         <Route
           index
@@ -73,10 +87,20 @@ const router = createBrowserRouter(
         element={<UserBookings />}
         errorElement={<Error />}
       />
+      <Route
+        path="profile"
+        element={<UserProfile />}
+        errorElement={<Error />}
+      />
       <Route path="host" element={<HostLayout />} errorElement={<Error />}>
         <Route
           index
           lazy={lazyRoute(() => import("./pages/Host/Dashboard"))}
+          errorElement={<Error />}
+        />
+        <Route
+          path="profile"
+          element={<HostProfile />}
           errorElement={<Error />}
         />
         <Route
