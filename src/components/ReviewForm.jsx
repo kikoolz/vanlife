@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createReview, getUserReviewForBooking } from "../api";
 import { getCurrentUser } from "../utils";
+import { validateRating, validateComment } from "../utils/validation";
 
 export default function ReviewForm({ booking, van, onReviewSubmitted }) {
   const [user, setUser] = useState(null);
@@ -40,8 +41,16 @@ export default function ReviewForm({ booking, van, onReviewSubmitted }) {
     setSubmitting(true);
     setMessage("");
 
-    if (rating === 0) {
-      setMessage({ type: "error", text: "Please select a rating" });
+    const ratingValidation = validateRating(rating);
+    if (!ratingValidation.isValid) {
+      setMessage({ type: "error", text: ratingValidation.message });
+      setSubmitting(false);
+      return;
+    }
+
+    const commentValidation = validateComment(comment);
+    if (!commentValidation.isValid) {
+      setMessage({ type: "error", text: commentValidation.message });
       setSubmitting(false);
       return;
     }
@@ -51,8 +60,8 @@ export default function ReviewForm({ booking, van, onReviewSubmitted }) {
         vanId: van.id,
         userId: user.id,
         bookingId: booking.id,
-        rating,
-        comment,
+        rating: ratingValidation.value,
+        comment: commentValidation.value,
       };
 
       const review = await createReview(reviewData);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { validatePassword } from "../utils/validation";
 
 export default function PasswordResetConfirm() {
   const [password, setPassword] = useState("");
@@ -35,10 +36,11 @@ export default function PasswordResetConfirm() {
       return;
     }
 
-    if (password.length < 6) {
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
       setMessage({
         type: "error",
-        text: "Password must be at least 6 characters long.",
+        text: passwordValidation.message,
       });
       setLoading(false);
       return;
@@ -46,7 +48,7 @@ export default function PasswordResetConfirm() {
 
     try {
       const { error } = await supabase.auth.updateUser({
-        password: password,
+        password: passwordValidation.value,
       });
 
       if (error) throw error;

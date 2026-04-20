@@ -1,8 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      filename: "dist/stats.html",
+    }),
+  ],
   build: {
     rollupOptions: {
       output: {
@@ -19,6 +28,10 @@ export default defineConfig({
             return "supabase";
           }
 
+          if (id.includes("@stripe/")) {
+            return "stripe";
+          }
+
           if (id.includes("react-router")) {
             return "router";
           }
@@ -29,6 +42,14 @@ export default defineConfig({
 
           return "vendor";
         },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
       },
     },
   },

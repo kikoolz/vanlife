@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { getCurrentUser } from "../utils";
+import { validateName } from "../utils/validation";
+import { SkeletonProfileForm } from "../components/Skeleton";
 
 export default function UserProfile() {
   const [user, setUser] = useState(null);
@@ -36,10 +38,17 @@ export default function UserProfile() {
     setSaving(true);
     setMessage("");
 
+    const nameValidation = validateName(formData.fullName);
+    if (!nameValidation.isValid) {
+      setMessage({ type: "error", text: nameValidation.message });
+      setSaving(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.updateUser({
         data: {
-          full_name: formData.fullName,
+          full_name: nameValidation.value,
         },
       });
 
@@ -62,7 +71,12 @@ export default function UserProfile() {
   }
 
   if (loading) {
-    return <div className="loading">Loading profile...</div>;
+    return (
+      <div className="profile-container">
+        <h1>User Profile</h1>
+        <SkeletonProfileForm />
+      </div>
+    );
   }
 
   return (

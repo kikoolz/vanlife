@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Stripe from "stripe";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
@@ -9,9 +10,27 @@ const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const PORT = process.env.PORT || 3001;
 
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 API requests per windowMs
+  message: "Too many API requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(limiter); // Apply general rate limiting
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -19,7 +38,7 @@ app.get("/health", (req, res) => {
 });
 
 // Create payment intent endpoint
-app.post("/api/create-payment-intent", async (req, res) => {
+app.post("/api/create-payment-intent", apiLimiter, async (req, res) => {
   try {
     const { amount, currency = "usd" } = req.body;
 
@@ -48,7 +67,7 @@ app.post("/api/create-payment-intent", async (req, res) => {
 });
 
 // Confirm payment endpoint (optional - for webhook handling)
-app.post("/api/confirm-payment", async (req, res) => {
+app.post("/api/confirm-payment", apiLimiter, async (req, res) => {
   try {
     const { paymentIntentId } = req.body;
 

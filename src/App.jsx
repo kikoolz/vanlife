@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import {
   RouterProvider,
   Route,
@@ -8,6 +9,7 @@ import "./index.css";
 import Layout from "./components/Layout";
 import HostLayout from "./components/HostLayout";
 import Error from "./components/Error";
+import ErrorBoundary from "./components/ErrorBoundary";
 import BookingConfirmation from "./components/BookingConfirmation";
 import UserBookings from "./pages/UserBookings";
 import UserProfile from "./pages/UserProfile";
@@ -172,9 +174,11 @@ const router = createBrowserRouter(
 
 export default function App() {
   return (
-    <RouterProvider
-      router={router}
-      fallbackElement={<div className="route-loading">Loading...</div>}
-    />
+    <ErrorBoundary>
+      <RouterProvider
+        router={router}
+        fallbackElement={<div className="route-loading">Loading...</div>}
+      />
+    </ErrorBoundary>
   );
 }

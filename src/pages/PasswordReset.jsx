@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { validateEmail } from "../utils/validation";
 
 export default function PasswordReset() {
   const [email, setEmail] = useState("");
@@ -14,8 +15,18 @@ export default function PasswordReset() {
     setLoading(true);
     setMessage("");
 
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      setMessage({
+        type: "error",
+        text: emailValidation.message,
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.value, {
         redirectTo: `${window.location.origin}/password-reset/confirm`,
       });
 

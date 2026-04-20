@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { getCurrentUser, getDemoHostId } from "../../utils";
+import { SkeletonProfileForm } from "../../components/Skeleton";
 
 export default function HostProfile() {
   const [user, setUser] = useState(null);
@@ -68,7 +69,12 @@ export default function HostProfile() {
   }
 
   if (loading) {
-    return <div className="loading">Loading host profile...</div>;
+    return (
+      <div className="profile-container">
+        <h1>Host Profile</h1>
+        <SkeletonProfileForm />
+      </div>
+    );
   }
 
   return (

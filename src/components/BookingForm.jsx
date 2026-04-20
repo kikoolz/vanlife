@@ -4,8 +4,10 @@ import { createBooking, checkAvailability, createPaymentIntent as createPaymentI
 import { supabase } from "../lib/supabase";
 import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
+import { getAuthSession } from "../utils";
+import { config } from "../config";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(config.stripe.publishableKey);
 
 function BookingFormContent({ van }) {
   const navigate = useNavigate();

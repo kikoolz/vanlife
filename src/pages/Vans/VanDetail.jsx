@@ -1,6 +1,7 @@
 import { Link, useLocation, useLoaderData } from "react-router-dom";
 import { getVans } from "../../api";
 import BookingForm from "../../components/BookingForm";
+import OptimizedImage from "../../components/OptimizedImage";
 
 export function loader({ params }) {
   return getVans(params.id);
@@ -20,7 +21,7 @@ export default function VanDetail() {
       </Link>
 
       <div className="van-detail">
-        <img src={van.imageUrl} alt={`${van.name} van exterior`} />
+        <OptimizedImage src={van.imageUrl} alt={`${van.name} van exterior`} />
         <i className={`van-type ${van.type} selected`}>{van.type}</i>
         <h2>{van.name}</h2>
         <p className="van-price">

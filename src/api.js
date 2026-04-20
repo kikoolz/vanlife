@@ -2,8 +2,128 @@ import { supabase } from "./lib/supabase";
 
 const BUCKET_NAME = "van-images";
 import { getDemoHostId } from "./utils";
+import { Monitoring } from "./utils/monitoring";
 
-const responseCache = new Map();
+// Improved caching with TTL and size limits
+const DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100;
+
+class Cache {
+  constructor(maxSize = MAX_CACHE_SIZE, defaultTTL = DEFAULT_CACHE_TTL) {
+    this.cache = new Map();
+    this.maxSize = maxSize;
+    this.defaultTTL = defaultTTL;
+  }
+
+  set(key, data, ttl = this.defaultTTL) {
+    // Remove oldest entry if cache is full
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+
+    this.cache.set(key, {
+      data: structuredClone(data),
+      timestamp: Date.now(),
+      ttl,
+    });
+  }
+
+  get(key) {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+
+    // Check if entry has expired
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return structuredClone(entry.data);
+  }
+
+  delete(key) {
+    this.cache.delete(key);
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+
+  invalidatePattern(pattern) {
+    for (const key of this.cache.keys()) {
+      if (key.includes(pattern)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  // Get cache statistics
+  getStats() {
+    return {
+      size: this.cache.size,
+      maxSize: this.maxSize,
+      keys: Array.from(this.cache.keys()),
+    };
+  }
+}
+
+const responseCache = new Cache();
+
+// Local storage cache for persistent data
+const localStorageCache = {
+  set(key, data, ttl = DEFAULT_CACHE_TTL) {
+    try {
+      const entry = {
+        data,
+        timestamp: Date.now(),
+        ttl,
+      };
+      localStorage.setItem(key, JSON.stringify(entry));
+    } catch (error) {
+      console.warn("Failed to set localStorage cache:", error);
+    }
+  },
+
+  get(key) {
+    try {
+      const entry = localStorage.getItem(key);
+      if (!entry) return null;
+
+      const parsed = JSON.parse(entry);
+      if (Date.now() - parsed.timestamp > parsed.ttl) {
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      return parsed.data;
+    } catch (error) {
+      console.warn("Failed to get localStorage cache:", error);
+      return null;
+    }
+  },
+
+  delete(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn("Failed to delete localStorage cache:", error);
+    }
+  },
+
+  clear() {
+    try {
+      // Only clear app-specific keys
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith("vanlife_")) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to clear localStorage cache:", error);
+    }
+  },
+};
 
 function createApiError(status, statusText, message) {
   return {
@@ -13,22 +133,44 @@ function createApiError(status, statusText, message) {
   };
 }
 
-function getCachedResponse(cacheKey) {
-  const cachedResponse = responseCache.get(cacheKey);
-
-  if (!cachedResponse) {
-    return null;
+function getCachedResponse(cacheKey, useLocalStorage = false) {
+  if (useLocalStorage) {
+    return localStorageCache.get(`vanlife_${cacheKey}`);
   }
-
-  return structuredClone(cachedResponse);
+  return responseCache.get(cacheKey);
 }
 
-function setCachedResponse(cacheKey, data) {
-  responseCache.set(cacheKey, structuredClone(data));
+function setCachedResponse(cacheKey, data, ttl = DEFAULT_CACHE_TTL, useLocalStorage = false) {
+  if (useLocalStorage) {
+    localStorageCache.set(`vanlife_${cacheKey}`, data, ttl);
+  } else {
+    responseCache.set(cacheKey, data, ttl);
+  }
+}
+
+function invalidateCache(pattern) {
+  responseCache.invalidatePattern(pattern);
+  // Also invalidate localStorage cache
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("vanlife_") && key.includes(pattern)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to invalidate localStorage cache:", error);
+  }
 }
 
 function handleSupabaseError(error, fallbackMessage) {
   if (error) {
+    // Log error for monitoring
+    Monitoring.logError(error, {
+      code: error.code,
+      message: error.message,
+      fallbackMessage,
+    });
+
     // Map common Supabase error codes to user-friendly messages
     const errorMessages = {
       "23505": "This record already exists.",
@@ -490,9 +632,9 @@ export async function updateVan(vanId, updates) {
 
   handleSupabaseError(error, "Failed to update van.");
 
-  // Invalidate cache for this van
-  responseCache.delete(`van:${vanId}`);
-  responseCache.delete("vans:all");
+  // Invalidate cache
+  invalidateCache(`van:${vanId}`);
+  invalidateCache("vans:all");
 
   return data;
 }
@@ -506,8 +648,8 @@ export async function createVan(vanData) {
 
   handleSupabaseError(error, "Failed to create van.");
 
-  // Invalidate cache to refresh van list
-  responseCache.delete("vans:all");
+  // Invalidate cache
+  invalidateCache("vans:all");
 
   return data;
 }
@@ -520,9 +662,9 @@ export async function deleteVan(vanId) {
 
   handleSupabaseError(error, "Failed to delete van.");
 
-  // Invalidate cache to refresh van list
-  responseCache.delete(`van:${vanId}`);
-  responseCache.delete("vans:all");
+  // Invalidate cache
+  invalidateCache(`van:${vanId}`);
+  invalidateCache("vans:all");
 }
 
 export async function updateBookingDates(bookingId, startDate, endDate) {
@@ -539,7 +681,7 @@ export async function updateBookingDates(bookingId, startDate, endDate) {
   handleSupabaseError(error, "Failed to update booking dates.");
 
   // Invalidate cache
-  responseCache.delete(`booking:${bookingId}`);
+  invalidateCache(`booking:${bookingId}`);
   
   return data;
 }

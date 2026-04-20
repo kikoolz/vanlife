@@ -2,6 +2,7 @@ import { Link, redirect, useLoaderData, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "../api";
 import { getAuthSession } from "../utils";
+import { validateEmail, validatePassword } from "../utils/validation";
 
 export async function loader({ request }) {
   const session = await getAuthSession();
@@ -18,10 +19,6 @@ export async function loader({ request }) {
   };
 }
 
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export default function Login() {
   const { message, redirectTo } = useLoaderData();
   const navigate = useNavigate();
@@ -34,23 +31,25 @@ export default function Login() {
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email")?.toString().trim().toLowerCase() || "";
+    const email = formData.get("email")?.toString() || "";
     const password = formData.get("password")?.toString() || "";
 
-    if (!validateEmail(email)) {
-      setError("Enter a valid email address.");
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      setError(emailValidation.message);
       setIsSubmitting(false);
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.message);
       setIsSubmitting(false);
       return;
     }
 
     try {
-      await loginUser({ email, password });
+      await loginUser({ email: emailValidation.value, password: passwordValidation.value });
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message || "Unable to log in.");

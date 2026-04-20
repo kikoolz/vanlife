@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getUserBookings, cancelBooking, updateBookingDates } from "../api";
 import { supabase } from "../lib/supabase";
+import { SkeletonBookingCard } from "../components/Skeleton";
 
 export default function UserBookings() {
   const [bookings, setBookings] = useState([]);
@@ -117,7 +118,11 @@ export default function UserBookings() {
     return (
       <div className="user-bookings-container">
         <h1>My Bookings</h1>
-        <p>Loading...</p>
+        <div className="bookings-list">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonBookingCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }

@@ -19,13 +19,6 @@ export default function HostLayout() {
         </NavLink>
 
         <NavLink
-          to="/host/profile"
-          style={({ isActive }) => (isActive ? activeStyles : null)}
-        >
-          Profile
-        </NavLink>
-
-        <NavLink
           to="/host/income"
           style={({ isActive }) => (isActive ? activeStyles : null)}
         >

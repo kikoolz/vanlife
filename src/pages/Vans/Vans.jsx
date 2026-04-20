@@ -2,6 +2,7 @@ import { Link, useLoaderData, useSearchParams } from "react-router-dom";
 import { getVans } from "../../api";
 import { useState, Suspense } from "react";
 import { SkeletonVanCard } from "../../components/Skeleton";
+import OptimizedImage from "../../components/OptimizedImage";
 
 const FILTER_TYPES = ["simple", "luxury", "rugged"];
 
@@ -64,7 +65,7 @@ export default function Vans() {
         state={{ search: typeFilter ? `?type=${typeFilter}` : "", type: typeFilter }}
         aria-label={`View details for ${van.name}, priced at $${van.price} per day`}
       >
-        <img src={van.imageUrl} alt={van.name} />
+        <OptimizedImage src={van.imageUrl} alt={van.name} />
         <div className="van-info">
           <h2>{van.name}</h2>
           <p>
