@@ -91,7 +91,7 @@ function BookingFormContent({ van }) {
 
     try {
       const totalPrice = calculateTotalPrice();
-      const paymentIntent = await createPaymentIntent(totalPrice);
+      const paymentIntent = await createPaymentIntentAPI(totalPrice);
       setClientSecret(paymentIntent.clientSecret);
       setPaymentIntentId(paymentIntent.id);
       setShowPaymentForm(true);
