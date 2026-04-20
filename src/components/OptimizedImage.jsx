@@ -7,6 +7,7 @@ export default function OptimizedImage({
   width,
   height,
   loading = "lazy",
+  priority = false,
   ...props
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -27,6 +28,20 @@ export default function OptimizedImage({
     };
   }, []);
 
+  // Preload critical images
+  useEffect(() => {
+    if (priority && src) {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = src;
+      document.head.appendChild(link);
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, [priority, src]);
+
   return (
     <>
       {!isLoaded && !isError && (
@@ -39,13 +54,13 @@ export default function OptimizedImage({
         ref={imgRef}
         src={src}
         alt={alt}
-        className={`${className} ${isLoaded ? "loaded" : ""}`}
+        className={`${className}`}
         loading={loading}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
         width={width}
         height={height}
         style={{
-          opacity: isLoaded ? 1 : 0,
-          transition: "opacity 0.3s ease-in-out",
           display: isError ? "none" : "block",
         }}
         {...props}

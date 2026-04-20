@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { getHostVans, getHostIncome, getHostReviews } from "../../api";
 import { requireAuth } from "../../utils";
+import OptimizedImage from "../../components/OptimizedImage";
 
 export async function loader({ request }) {
   await requireAuth({ request });
@@ -19,7 +20,7 @@ export default function Dashboard() {
   const vanElements = displayedVans.map((van) => (
     <div key={van.id} className="dashboard-van-item">
       <div className="dashboard-van-info">
-        <img src={van.imageUrl} alt={van.name} />
+        <OptimizedImage src={van.imageUrl} alt={van.name} />
         <div className="dashboard-van-details">
           <h3>{van.name}</h3>
           <p>${van.price}/day</p>

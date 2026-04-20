@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useLoaderData } from "react-router-dom";
 import { getHostVans } from "../../api";
 import { requireAuth } from "../../utils";
+import OptimizedImage from "../../components/OptimizedImage";
 
 export async function loader({ params, request }) {
   await requireAuth({ request });
@@ -24,7 +25,7 @@ export default function HostVansDetails() {
 
       <div className="host-van-detail-layout-container">
         <div className="host-van-detail">
-          <img src={currentVan.imageUrl} alt={`${currentVan.name} van`} />
+          <OptimizedImage src={currentVan.imageUrl} alt={`${currentVan.name} van`} />
           <div className="host-van-detail-info-text">
             <i className={`van-type van-type-${currentVan.type}`}>
               {currentVan.type}
