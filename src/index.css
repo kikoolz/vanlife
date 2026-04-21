@@ -8,6 +8,9 @@ body {
   padding: 0;
   background-color: #fff7ed;
   font-family: "Inter", sans-serif;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 a {
@@ -50,6 +53,10 @@ header {
   display: flex;
   align-items: center;
   padding-block: 10px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
 }
 
 header .site-logo {
@@ -120,6 +127,10 @@ footer {
   height: 74px;
   display: flex;
   flex-shrink: 0;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
   justify-content: center;
   align-items: center;
   margin-top: auto;
