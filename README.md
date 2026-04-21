@@ -38,7 +38,7 @@ A full-featured van rental platform with user authentication, booking management
 ## Tech Stack
 
 ### Frontend
-- React 19
+- React 18
 - Vite
 - React Router v7
 - Supabase JS Client
