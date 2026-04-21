@@ -26,18 +26,21 @@ A full-featured van rental platform with user authentication, booking management
 - Supabase PostgreSQL database
 - Supabase Storage for image uploads
 - Row-Level Security (RLS) policies
-- React Router for navigation
+- React Router v7 for navigation
 - Stripe payment processing
 - Express.js backend for payment intents
-- Client-side caching
+- Client-side caching with TTL
 - Lazy loading for performance
+- Image optimization with Supabase transformation API
+- Consistent image dimensions with object-fit
+- GitHub Actions CI/CD pipeline
 
 ## Tech Stack
 
 ### Frontend
-- React 18
+- React 19
 - Vite
-- React Router DOM
+- React Router v7
 - Supabase JS Client
 - Stripe React
 
@@ -211,8 +214,6 @@ vanlife/
 
 ## Future Enhancements
 
-- Van editing and deletion
-- Advanced search and filtering
 - User and host profiles
 - Review submission system
 - Booking modification
