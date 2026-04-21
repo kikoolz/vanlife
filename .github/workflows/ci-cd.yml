@@ -1,5 +1,6 @@
 name: CI/CD Pipeline
 
+# Test CI/CD pipeline
 on:
   push:
     branches: [ master, main ]
