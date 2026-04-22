@@ -2,8 +2,10 @@ import { Link, useLocation, useLoaderData } from "react-router-dom";
 import { getVans } from "../../api";
 import BookingForm from "../../components/BookingForm";
 import OptimizedImage from "../../components/OptimizedImage";
+import { requireAuth } from "../../utils";
 
-export function loader({ params }) {
+export async function loader({ params, request }) {
+  await requireAuth({ request });
   return getVans(params.id);
 }
 

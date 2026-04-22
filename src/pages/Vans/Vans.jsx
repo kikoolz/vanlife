@@ -3,10 +3,12 @@ import { getVans } from "../../api";
 import { useState, Suspense } from "react";
 import { SkeletonVanCard } from "../../components/Skeleton";
 import OptimizedImage from "../../components/OptimizedImage";
+import { requireAuth } from "../../utils";
 
 const FILTER_TYPES = ["simple", "luxury", "rugged"];
 
-export function loader() {
+export async function loader({ request }) {
+  await requireAuth({ request });
   return getVans();
 }
 
