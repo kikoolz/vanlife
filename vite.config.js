@@ -16,31 +16,18 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (!id.includes("node_modules")) {
-            return undefined;
+          if (id.includes("node_modules")) {
+            if (id.includes("@supabase/") || id.includes("@supabase-js")) {
+              return "supabase";
+            }
+            if (id.includes("@stripe/")) {
+              return "stripe";
+            }
+            if (id.includes("react-router")) {
+              return "router";
+            }
           }
-
-          if (
-            id.includes("@supabase/") ||
-            id.includes("@supabase\\") ||
-            id.includes("@supabase-js")
-          ) {
-            return "supabase";
-          }
-
-          if (id.includes("@stripe/")) {
-            return "stripe";
-          }
-
-          if (id.includes("react-router")) {
-            return "router";
-          }
-
-          if (id.includes("react-dom") || id.includes("/react/")) {
-            return "react-vendor";
-          }
-
-          return "vendor";
+          return undefined;
         },
       },
     },
