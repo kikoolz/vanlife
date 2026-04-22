@@ -70,11 +70,13 @@ const router = createBrowserRouter(
       <Route path="vans">
         <Route
           index
+          loader={requireAuth}
           lazy={lazyRoute(() => import("./pages/Vans/Vans"))}
           errorElement={<Error />}
         />
         <Route
           path=":id"
+          loader={requireAuth}
           lazy={lazyRoute(() => import("./pages/Vans/VanDetail"))}
           errorElement={<Error />}
         />
