@@ -1,3 +1,5 @@
+![VanLife](src/assets/images/travel.png)
+
 # 🚐 VanLife
 
 A full-featured van rental platform with user authentication, booking management, payment processing, and host management capabilities.
